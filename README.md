@@ -83,4 +83,14 @@ python -m compileall src/dari
 ```
 
 Contributions are welcome via pull request.
+
+## Automated Publishing
+
+Pushing to the `main` branch automatically builds and publishes a release to PyPI via GitHub Actions (`.github/workflows/publish.yml`).
+
+1. Create a PyPI API token with publish rights for `dari-python`.
+2. Add the token as a repository secret named `PYPI_API_TOKEN` (username is inferred as `__token__`).
+3. Push a commit to `main`; the workflow will build wheels/sdist with `python -m build` and upload them using the token.
+
+The job uses trusted publishing via OIDC (`id-token: write`) so no long‑lived credentials are stored in the workflow.
 # dari-python
