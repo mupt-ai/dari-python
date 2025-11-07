@@ -109,7 +109,7 @@ class Dari:
             payload["screen_config"] = dict(screen_config)
         if set_cache is not None:
             payload["set_cache"] = set_cache
-        return self._request("POST", "/single-actions/run-action", json=payload)
+        return self._request("POST", "/single-actions/run-action", json=payload, timeout=120)
 
     # ------------------------------------------------------------------
     # Session helpers
@@ -137,6 +137,7 @@ class Dari:
         params: Optional[Mapping[str, Any]] = None,
         headers: Optional[Mapping[str, str]] = None,
         require_api_key: bool = True,
+        timeout: Optional[int | float] = None,
     ) -> Any:
         if path_or_url.startswith("http://") or path_or_url.startswith("https://"):
             url = path_or_url
@@ -156,7 +157,7 @@ class Dari:
                 json=json,
                 params=params,
                 headers=request_headers,
-                timeout=self.timeout,
+                timeout=timeout if timeout is not None else self.timeout,
             )
         except requests.RequestException as exc:  # pragma: no cover - simple passthrough
             raise DariError(str(exc)) from exc
