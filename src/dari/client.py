@@ -77,10 +77,46 @@ class Dari:
 
         return self._request("GET", "/credentials")
 
+    def create_credential(
+        self,
+        *,
+        service_name: str,
+        username_or_email: Optional[str] = None,
+        password: Optional[str] = None,
+        totp_secret: Optional[str] = None,
+        gmail_oauth_account_id: Optional[str] = None,
+        phone_number_id: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Create a new credential with API key authentication."""
+
+        payload: Dict[str, Any] = {"service_name": service_name}
+        if username_or_email is not None:
+            payload["username_or_email"] = username_or_email
+        if password is not None:
+            payload["password"] = password
+        if totp_secret is not None:
+            payload["totp_secret"] = totp_secret
+        if gmail_oauth_account_id is not None:
+            payload["gmail_oauth_account_id"] = gmail_oauth_account_id
+        if phone_number_id is not None:
+            payload["phone_number_id"] = phone_number_id
+        return self._request("POST", "/credentials", json=payload)
+
     def list_connected_accounts(self) -> Any:
         """Return OAuth accounts associated with the workspace."""
 
         return self._request("GET", "/connected-accounts")
+
+    def list_phone_numbers(self) -> Any:
+        """Return all phone numbers for the workspace."""
+
+        return self._request("GET", "/phone-numbers")
+
+    def purchase_phone_number(self, *, label: str) -> Dict[str, Any]:
+        """Purchase a new Twilio phone number for the workspace."""
+
+        payload = {"label": label}
+        return self._request("POST", "/phone-numbers", json=payload)
 
     # ------------------------------------------------------------------
     # Computer use helpers

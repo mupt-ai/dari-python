@@ -44,7 +44,23 @@ print("Execution status:", execution["status"])
 # 4. Resume a paused workflow inside your webhook handler
 # resume_payload = client.resume_workflow(resume_url, {"user_response": "approved"})
 
-# 5. Trigger a single computer-use action
+# 5. Manage credentials
+credential = client.create_credential(
+    service_name="Gmail",
+    username_or_email="user@example.com",
+    password="mypassword",
+    totp_secret="JBSWY3DPEHPK3PXP",
+)
+print("Created credential:", credential["id"])
+
+# 6. Manage phone numbers for SMS 2FA
+phone_number = client.purchase_phone_number(label="Support Line")
+print("Purchased phone:", phone_number["phone_e164"])
+
+phone_numbers = client.list_phone_numbers()
+print(f"Total phone numbers: {len(phone_numbers)}")
+
+# 7. Trigger a single computer-use action
 client.run_single_action(
     cdp_url="ws://localhost:9222/devtools/page/123",
     action="Open Google Calendar and create a meeting",
@@ -64,7 +80,10 @@ Each method maps one-to-one with the docs under `docs/api-reference/endpoint/`:
 | `get_execution_details(workflow_id, execution_id)` | `GET /public/workflows/{workflow_id}/executions/{execution_id}` |
 | `resume_workflow(resume_url, variables)` | `POST {resume_workflow_url}` |
 | `list_credentials()` | `GET /credentials` |
+| `create_credential(**kwargs)` | `POST /credentials` |
 | `list_connected_accounts()` | `GET /connected-accounts` |
+| `list_phone_numbers()` | `GET /phone-numbers` |
+| `purchase_phone_number(label)` | `POST /phone-numbers` |
 | `run_single_action(**kwargs)` | `POST /single-actions/run-action` |
 
 ## Error handling
