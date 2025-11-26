@@ -124,19 +124,32 @@ class Dari:
     def run_single_action(
         self,
         *,
-        cdp_url: str,
         action: str,
+        session_id: Optional[str] = None,
         identifier: Optional[str] = None,
         variables: Optional[Mapping[str, Any]] = None,
         screen_config: Optional[Mapping[str, Any]] = None,
         set_cache: Optional[bool] = None,
     ) -> Dict[str, Any]:
-        """Execute a single action with the Computer Use agent."""
+        """Execute a single action with the Computer Use agent.
+
+        Args:
+            action: The action to perform
+            session_id: Optional existing session ID to use. If not provided, auto-creates a 10-min session
+            identifier: Optional identifier for the action
+            variables: Optional variables for the action
+            screen_config: Screen configuration (only used when auto-creating session)
+            set_cache: Whether to cache the result
+
+        Returns:
+            Dict containing success, result, credits, error, and cache info
+        """
 
         payload: Dict[str, Any] = {
-            "cdp_url": cdp_url,
             "action": action,
         }
+        if session_id is not None:
+            payload["session_id"] = session_id
         if identifier is not None:
             payload["id"] = identifier
         if variables is not None:
@@ -145,7 +158,123 @@ class Dari:
             payload["screen_config"] = dict(screen_config)
         if set_cache is not None:
             payload["set_cache"] = set_cache
-        return self._request("POST", "/single-actions/run-action", json=payload, timeout=120)
+        return self._request("POST", "/run-action", json=payload, timeout=120)
+
+    # ------------------------------------------------------------------
+    # Browser session management
+    # ------------------------------------------------------------------
+    def create_session(
+        self,
+        *,
+        cdp_url: Optional[str] = None,
+        screen_config: Optional[Mapping[str, Any]] = None,
+        ttl: Optional[int] = None,
+        metadata: Optional[Mapping[str, Any]] = None,
+    ) -> Dict[str, Any]:
+        """Create a managed browser session.
+
+        Args:
+            cdp_url: Optional external CDP URL to bring your own browser
+            screen_config: Screen configuration (width, height)
+            ttl: Time-to-live in seconds, max 86400 (24 hours)
+            metadata: Optional custom metadata
+
+        Returns:
+            Dict containing session_id, cdp_url, screen_config, status, expires_at, metadata, created_at, updated_at
+        """
+
+        payload: Dict[str, Any] = {}
+        if cdp_url is not None:
+            payload["cdp_url"] = cdp_url
+        if screen_config is not None:
+            payload["screen_config"] = dict(screen_config)
+        if ttl is not None:
+            payload["ttl"] = ttl
+        if metadata is not None:
+            payload["metadata"] = dict(metadata)
+        return self._request("POST", "/sessions", json=payload)
+
+    def get_session(self, session_id: str) -> Dict[str, Any]:
+        """Get details of a specific session.
+
+        Args:
+            session_id: The session ID to retrieve
+
+        Returns:
+            Dict containing session details
+        """
+
+        return self._request("GET", f"/sessions/{session_id}")
+
+    def list_sessions(
+        self,
+        *,
+        status_filter: Optional[str] = None,
+        limit: Optional[int] = None,
+        offset: Optional[int] = None,
+    ) -> Dict[str, Any]:
+        """List all sessions.
+
+        Args:
+            status_filter: Optional status filter (e.g., 'active')
+            limit: Maximum number of sessions to return
+            offset: Number of sessions to skip
+
+        Returns:
+            Dict containing sessions list and total count
+        """
+
+        params: Dict[str, Any] = {}
+        if status_filter is not None:
+            params["status_filter"] = status_filter
+        if limit is not None:
+            params["limit"] = limit
+        if offset is not None:
+            params["offset"] = offset
+        return self._request("GET", "/sessions", params=params if params else None)
+
+    def update_session(
+        self,
+        session_id: str,
+        *,
+        ttl: Optional[int] = None,
+        metadata: Optional[Mapping[str, Any]] = None,
+    ) -> Dict[str, Any]:
+        """Update a session's TTL or metadata.
+
+        Args:
+            session_id: The session ID to update
+            ttl: Optional new TTL in seconds to extend expiration
+            metadata: Optional metadata to merge with existing metadata
+
+        Returns:
+            Dict containing updated session details
+        """
+
+        payload: Dict[str, Any] = {}
+        if ttl is not None:
+            payload["ttl"] = ttl
+        if metadata is not None:
+            payload["metadata"] = dict(metadata)
+        return self._request("PATCH", f"/sessions/{session_id}", json=payload)
+
+    def terminate_session(self, session_id: str) -> None:
+        """Terminate a session.
+
+        Args:
+            session_id: The session ID to terminate
+        """
+
+        self._request("POST", f"/sessions/{session_id}/terminate")
+
+    def delete_session(self, session_id: str) -> None:
+        """Delete a session.
+
+        Args:
+            session_id: The session ID to delete
+        """
+
+        self._request("DELETE", f"/sessions/{session_id}")
 
     # ------------------------------------------------------------------
     # Session helpers
