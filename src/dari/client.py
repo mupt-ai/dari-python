@@ -158,7 +158,7 @@ class Dari:
             payload["screen_config"] = dict(screen_config)
         if set_cache is not None:
             payload["set_cache"] = set_cache
-        return self._request("POST", "/run-action", json=payload, timeout=120)
+        return self._request("POST", "/single-actions/run-action", json=payload, timeout=120)
 
     # ------------------------------------------------------------------
     # Browser session management
