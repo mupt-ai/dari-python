@@ -126,7 +126,7 @@ class Dari:
         *,
         action: str,
         session_id: Optional[str] = None,
-        identifier: Optional[str] = None,
+        id: Optional[str] = None,
         variables: Optional[Mapping[str, Any]] = None,
         screen_config: Optional[Mapping[str, Any]] = None,
         set_cache: Optional[bool] = None,
@@ -136,7 +136,7 @@ class Dari:
         Args:
             action: The action to perform
             session_id: Optional existing session ID to use. If not provided, auto-creates a 10-min session
-            identifier: Optional identifier for the action
+            id: Optional ID for caching the step instance
             variables: Optional variables for the action
             screen_config: Screen configuration (only used when auto-creating session)
             set_cache: Whether to cache the result
@@ -150,8 +150,8 @@ class Dari:
         }
         if session_id is not None:
             payload["session_id"] = session_id
-        if identifier is not None:
-            payload["id"] = identifier
+        if id is not None:
+            payload["id"] = id
         if variables is not None:
             payload["variables"] = dict(variables)
         if screen_config is not None:

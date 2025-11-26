@@ -64,7 +64,7 @@ print(f"Total phone numbers: {len(phone_numbers)}")
 result = client.run_single_action(
     action="Open Google Calendar and create a meeting",
     screen_config={"width": 1280, "height": 720},
-    identifier="calendar-meeting-step",
+    id="calendar-meeting-step",
     variables={"meeting_title": "Internal sync"},
 )
 print("Action result:", result["result"])
