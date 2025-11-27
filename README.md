@@ -60,16 +60,7 @@ print("Purchased phone:", phone_number["phone_e164"])
 phone_numbers = client.list_phone_numbers()
 print(f"Total phone numbers: {len(phone_numbers)}")
 
-# 7. Run a single action (auto-creates a 10-min session)
-result = client.run_single_action(
-    action="Open Google Calendar and create a meeting",
-    screen_config={"width": 1280, "height": 720},
-    id="calendar-meeting-step",
-    variables={"meeting_title": "Internal sync"},
-)
-print("Action result:", result["result"])
-
-# 8. Session management - create and reuse sessions
+# 7. Session management - create and reuse sessions
 session = client.create_session(
     screen_config={"width": 1280, "height": 720},
     ttl=3600,  # 1 hour
@@ -80,20 +71,21 @@ print("Session ID:", session["session_id"])
 # Run multiple actions on the same session
 result1 = client.run_single_action(
     action="Navigate to login page",
-    session_id=session["session_id"]
+    session_id=session["session_id"],
+    id="nav-to-login",
+    variables={"meeting_title": "Internal sync"},
 )
 
 result2 = client.run_single_action(
     action="Fill in username and password",
-    session_id=session["session_id"]
+    session_id=session["session_id"],
+    id="fill-credentials"
 )
+print("Action result:", result2["result"])
 
 # List all active sessions
 sessions = client.list_sessions(status_filter="active", limit=50)
 print(f"Active sessions: {sessions['total']}")
-
-# Update session TTL
-client.update_session(session["session_id"], ttl=7200)
 
 # Terminate session when done
 client.terminate_session(session["session_id"])
@@ -124,7 +116,6 @@ Each method maps one-to-one with the docs under `docs/api-reference/endpoint/`:
 | `create_session(**kwargs)` | `POST /sessions` |
 | `get_session(session_id)` | `GET /sessions/{session_id}` |
 | `list_sessions(**kwargs)` | `GET /sessions` |
-| `update_session(session_id, **kwargs)` | `PATCH /sessions/{session_id}` |
 | `terminate_session(session_id)` | `POST /sessions/{session_id}/terminate` |
 | `delete_session(session_id)` | `DELETE /sessions/{session_id}` |
 

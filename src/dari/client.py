@@ -51,7 +51,7 @@ class Dari:
         """Trigger a workflow execution with the provided input variables."""
 
         payload = {"input_variables": dict(input_variables)}
-        return self._request("POST", f"/workflows/start/{workflow_id}", json=payload)
+        return self._request("POST", f"/public/workflows/start/{workflow_id}", json=payload)
 
     def list_workflow_executions(self, workflow_id: str) -> Dict[str, Any]:
         """Return executions for the given workflow."""
@@ -75,7 +75,7 @@ class Dari:
     def list_credentials(self) -> Any:
         """Return saved browser credentials."""
 
-        return self._request("GET", "/credentials")
+        return self._request("GET", "/public/credentials")
 
     def create_credential(
         self,
@@ -100,23 +100,23 @@ class Dari:
             payload["gmail_oauth_account_id"] = gmail_oauth_account_id
         if phone_number_id is not None:
             payload["phone_number_id"] = phone_number_id
-        return self._request("POST", "/credentials", json=payload)
+        return self._request("POST", "/public/credentials", json=payload)
 
     def list_connected_accounts(self) -> Any:
         """Return OAuth accounts associated with the workspace."""
 
-        return self._request("GET", "/connected-accounts")
+        return self._request("GET", "/public/connected-accounts")
 
     def list_phone_numbers(self) -> Any:
         """Return all phone numbers for the workspace."""
 
-        return self._request("GET", "/phone-numbers")
+        return self._request("GET", "/public/phone-numbers")
 
     def purchase_phone_number(self, *, label: str) -> Dict[str, Any]:
         """Purchase a new Twilio phone number for the workspace."""
 
         payload = {"label": label}
-        return self._request("POST", "/phone-numbers", json=payload)
+        return self._request("POST", "/public/phone-numbers", json=payload)
 
     # ------------------------------------------------------------------
     # Computer use helpers
@@ -158,7 +158,7 @@ class Dari:
             payload["screen_config"] = dict(screen_config)
         if set_cache is not None:
             payload["set_cache"] = set_cache
-        return self._request("POST", "/single-actions/run-action", json=payload, timeout=120)
+        return self._request("POST", "/public/single-actions/run-action", json=payload, timeout=120)
 
     # ------------------------------------------------------------------
     # Browser session management
@@ -192,7 +192,7 @@ class Dari:
             payload["ttl"] = ttl
         if metadata is not None:
             payload["metadata"] = dict(metadata)
-        return self._request("POST", "/sessions", json=payload)
+        return self._request("POST", "/public/sessions", json=payload)
 
     def get_session(self, session_id: str) -> Dict[str, Any]:
         """Get details of a specific session.
@@ -204,7 +204,7 @@ class Dari:
             Dict containing session details
         """
 
-        return self._request("GET", f"/sessions/{session_id}")
+        return self._request("GET", f"/public/sessions/{session_id}")
 
     def list_sessions(
         self,
@@ -231,7 +231,7 @@ class Dari:
             params["limit"] = limit
         if offset is not None:
             params["offset"] = offset
-        return self._request("GET", "/sessions", params=params if params else None)
+        return self._request("GET", "/public/sessions", params=params if params else None)
 
     def update_session(
         self,
@@ -256,7 +256,7 @@ class Dari:
             payload["ttl"] = ttl
         if metadata is not None:
             payload["metadata"] = dict(metadata)
-        return self._request("PATCH", f"/sessions/{session_id}", json=payload)
+        return self._request("PATCH", f"/public/sessions/{session_id}", json=payload)
 
     def terminate_session(self, session_id: str) -> None:
         """Terminate a session.
@@ -265,7 +265,7 @@ class Dari:
             session_id: The session ID to terminate
         """
 
-        self._request("POST", f"/sessions/{session_id}/terminate")
+        self._request("POST", f"/public/sessions/{session_id}/terminate")
 
     def delete_session(self, session_id: str) -> None:
         """Delete a session.
@@ -274,7 +274,7 @@ class Dari:
             session_id: The session ID to delete
         """
 
-        self._request("DELETE", f"/sessions/{session_id}")
+        self._request("DELETE", f"/public/sessions/{session_id}")
 
     # ------------------------------------------------------------------
     # Session helpers
