@@ -47,10 +47,63 @@ class Dari:
     # ------------------------------------------------------------------
     # Workflow execution helpers
     # ------------------------------------------------------------------
-    def start_workflow(self, workflow_id: str, input_variables: Mapping[str, Any]) -> Dict[str, Any]:
-        """Trigger a workflow execution with the provided input variables."""
+    def start_workflow(
+        self,
+        workflow_id: str,
+        input_variables: Mapping[str, Any],
+        *,
+        timeout_minutes: Optional[int] = None,
+        should_update_cache: Optional[bool] = None,
+        allow_public_live_view: Optional[bool] = None,
+        browser_profile_id: Optional[str] = None,
+        use_proxy: Optional[bool] = None,
+        proxy_city: Optional[str] = None,
+        proxy_server: Optional[str] = None,
+        proxy_server_username: Optional[str] = None,
+        proxy_server_password: Optional[str] = None,
+        user_agent: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Trigger a workflow execution with the provided input variables.
 
-        payload = {"input_variables": dict(input_variables)}
+        Args:
+            workflow_id: The unique identifier of the workflow to start
+            input_variables: Key-value pairs of input variable names and their values
+            timeout_minutes: Maximum execution time in minutes
+            should_update_cache: Whether to update the execution cache (default: True)
+            allow_public_live_view: Enable public live viewing of the workflow execution (default: False)
+            browser_profile_id: UUID of a browser profile to use for this workflow execution
+            use_proxy: Enable proxy for browser sessions in this workflow
+            proxy_city: Proxy location (New York, Los Angeles, Chicago, Seattle, Miami, Toronto, London, Frankfurt, Singapore, Sydney)
+            proxy_server: Custom proxy server URL (e.g., http://proxy.example.com:8080)
+            proxy_server_username: Username for custom proxy server authentication
+            proxy_server_password: Password for custom proxy server authentication
+            user_agent: Custom user agent string for browser sessions
+
+        Returns:
+            Dict containing workflow_execution_id and status
+        """
+
+        payload: Dict[str, Any] = {"input_variables": dict(input_variables)}
+        if timeout_minutes is not None:
+            payload["timeout_minutes"] = timeout_minutes
+        if should_update_cache is not None:
+            payload["should_update_cache"] = should_update_cache
+        if allow_public_live_view is not None:
+            payload["allow_public_live_view"] = allow_public_live_view
+        if browser_profile_id is not None:
+            payload["browser_profile_id"] = browser_profile_id
+        if use_proxy is not None:
+            payload["use_proxy"] = use_proxy
+        if proxy_city is not None:
+            payload["proxy_city"] = proxy_city
+        if proxy_server is not None:
+            payload["proxy_server"] = proxy_server
+        if proxy_server_username is not None:
+            payload["proxy_server_username"] = proxy_server_username
+        if proxy_server_password is not None:
+            payload["proxy_server_password"] = proxy_server_password
+        if user_agent is not None:
+            payload["user_agent"] = user_agent
         return self._request("POST", f"/public/workflows/start/{workflow_id}", json=payload)
 
     def list_workflow_executions(self, workflow_id: str) -> Dict[str, Any]:
@@ -117,6 +170,36 @@ class Dari:
 
         payload = {"label": label}
         return self._request("POST", "/public/phone-numbers", json=payload)
+
+    def create_browser_profile(
+        self,
+        *,
+        name: str,
+        provider: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Create a new browser profile to persist cookies, login sessions, and browser state.
+
+        Args:
+            name: A unique name for the browser profile
+            provider: Browser provider to use (hyperbrowser or kernel), defaults to hyperbrowser
+
+        Returns:
+            Dict containing id, name, and created_at
+        """
+
+        payload: Dict[str, Any] = {"name": name}
+        if provider is not None:
+            payload["provider"] = provider
+        return self._request("POST", "/public/browser-profiles", json=payload)
+
+    def list_browser_profiles(self) -> Dict[str, Any]:
+        """Return all browser profiles in the workspace.
+
+        Returns:
+            Dict containing profiles array with id, name, and created_at for each profile
+        """
+
+        return self._request("GET", "/public/browser-profiles")
 
     # ------------------------------------------------------------------
     # Computer use helpers
